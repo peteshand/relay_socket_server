@@ -24,10 +24,10 @@ wss.on('connection', (ws, req) => {
     try {
       msg = JSON.parse(raw);
     } catch (err) {
-      console.warn('Invalid JSON:', raw.toString());
+      // console.warn('Invalid JSON:', raw.toString());
       return;
     }
-    console.log(`Message in group ${clientKey}:`, msg);
+    // console.log(`Message in group ${clientKey}:`, msg);
 
     // Forward to all other clients in the same group
     const set = groups.get(clientKey);
