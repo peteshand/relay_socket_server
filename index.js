@@ -45,6 +45,15 @@ wss.on('connection', (ws, req) => {
     if (groups.has(clientKey)) {
       const set = groups.get(clientKey);
       set.delete(ws);
+  
+      // 🔔 Notify others in the same group
+      const leaveMsg = JSON.stringify({ cmd: 'peer_left_session' });
+      for (const client of set) {
+        if (client.readyState === WebSocket.OPEN) {
+          client.send(leaveMsg);
+        }
+      }
+  
       if (set.size === 0) {
         groups.delete(clientKey);
       }
