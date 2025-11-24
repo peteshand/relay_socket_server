@@ -17,7 +17,16 @@ wss.on('connection', (ws, req) => {
   if (!groups.has(clientKey)) {
     groups.set(clientKey, new Set());
   }
-  groups.get(clientKey).add(ws);
+  const set = groups.get(clientKey);
+  set.add(ws);
+
+  // Notify other peers in the same group that a new peer joined
+  const joinMsg = JSON.stringify({ cmd: 'peer_joined_session' });
+  for (const client of set) {
+    if (client !== ws && client.readyState === WebSocket.OPEN) {
+      client.send(joinMsg);
+    }
+  }
 
   ws.on('message', raw => {
     let msg;
@@ -30,7 +39,6 @@ wss.on('connection', (ws, req) => {
     // console.log(`Message in group ${clientKey}:`, msg);
 
     // Forward to all other clients in the same group
-    const set = groups.get(clientKey);
     if (set) {
       for (const client of set) {
         if (client !== ws && client.readyState === WebSocket.OPEN) {
